@@ -2,7 +2,7 @@ require('dotenv').config();
 
 var express = require('express')
 var multer  = require('multer')
-var port = 3000;
+var port = process.env.PORT || 3000;
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const cloudinary = require('cloudinary').v2;
