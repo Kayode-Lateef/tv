@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="static/main.css">
+    <title>KingdomCtvn | Dashboard</title>
+</head>
+<body>
+    <div class="main">
+        <h2 class="h2_query">Kingdom<span>Ctvn</span></h2>
+        <div class="col-1" id="coll">
+            <nav>
+                <h2 class="hide_query">Kingdom<span>Ctvn</span></h2>
+                <ul id="add" class="topnav">
+                    <li><a href="/">Dashboard <i class="fa fa-user-o"></i></a></li>
+                    <li><a href="video-lib.html">Video Library <i class="fa fa-video-camera"></i></a></li>
+                    <li>                       
+                          
+
+                        <a href="upload.html">Upload Video <i class="fa fa-cloud-upload"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-2 row">
+            <div class="card1 column">
+                <div class="card">
+                    <div class="space" onclick="move()">
+                        <h2>Upload- Roku(Tv) <i id="11" class="fa fa-chevron-down"></i></h2>
+                        <b></b>
+                    </div>
+                    <div class="hide" id="1">
+                        <p>With the feed URL you can create your own custom Roku TV app that includes your on-demand video and your live stream URL
+                            Copy the following URL and enter it during the setup process at Roku.</p>
+                        <input type="text" value="http://127.0.0.1:5500/main.html#" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="card2 column">
+                <div class="card">
+                    <div class="space" onclick="push()">
+                        <h2>Upload- Fire(Tv) <i id="22" class="fa fa-chevron-down"></i></h2>
+                        <b></b>
+                    </div>
+                    <div class="hide" id="2">
+                        <p>With the MRSS feed you can create your own custom Amazon Fire TV app that includes your on-demand videos and your live stream URL.
+                            Copy the following URL and enter it during the setup process at Amazon Creator.</p>
+                        <input type="text" value="http://127.0.0.1:5500/main.html#" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="card3 column">
+                <div class="card">
+                    <div class="space" onclick="down()">
+                        <h2>Upload- Apple(Tv) <i id="33" class="fa fa-chevron-down"></i></h2>
+                        <b></b>
+                    </div>
+                    <div class="hide" id="3">
+                        <p>Upload is done through the feed URI, copy and paste the link below to your AppleTv</p>
+                        <input type="text" value="http://127.0.0.1:5500/main.html#" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <b>Copyright &copy; Kingdom<span>Ctvn</span> 2022</b>
+    </footer>
+
+
+    <script src="logic/main.js"></script>
+</body>
+</html>

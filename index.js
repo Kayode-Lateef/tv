@@ -1,0 +1,160 @@
+require('dotenv').config();
+
+var express = require('express')
+var multer  = require('multer')
+var port = 3000;
+const fs = require("fs");
+const bodyParser = require("body-parser");
+const cloudinary = require('cloudinary').v2;
+
+
+// Creating uploads folder if not already present
+// In "uploads" folder we will temporarily upload
+// image before uploading to cloudinary
+if (!fs.existsSync("./uploads")) {
+    fs.mkdirSync("./uploads");
+}
+var app = express()
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './uploads')
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname)
+    }
+})
+
+var upload = multer({ storage: storage })
+
+
+
+/*
+app.use('/a',express.static('/b'));
+Above line would serve all files/folders inside of the 'b' directory
+And make them accessible through http://localhost:3000/a.
+*/
+
+// Body parser configuration
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(express.static(__dirname + '/public'));
+app.use('/uploads', express.static('uploads'));
+
+
+// Cloudinary configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
+  });
+
+//   cloudinary.config({
+//     cloud_name: 'djqjie6ra',
+//     api_key: '693235451313966',
+//     api_secret: 'Prjtsyn-Hfjg_RNM8knTdJp430Q'
+//   });
+
+
+async function uploadToCloudinary(locaFilePath) {
+  
+    // locaFilePath: path of image which was just
+    // uploaded to "uploads" folder
+  
+    var mainFolderName = "main";
+    // filePathOnCloudinary: path of image we want
+    // to set when it is uploaded to cloudinary
+    var filePathOnCloudinary = 
+        mainFolderName + "/" + locaFilePath;
+  
+    return cloudinary.uploader
+        .upload(locaFilePath, { public_id: filePathOnCloudinary })
+        .then((result) => {
+  
+            // Image has been successfully uploaded on
+            // cloudinary So we dont need local image 
+            // file anymore
+            // Remove file from local uploads folder
+            fs.unlinkSync(locaFilePath);
+  
+            return {
+                message: "Success",
+                url: result.url,
+            };
+        })
+        .catch((error) => {
+  
+            // Remove file from local uploads folder
+            fs.unlinkSync(locaFilePath);
+            return { message: "Fail" };
+        });
+}
+  
+function buildSuccessMsg(urlList) {
+  
+    // Building success msg to display on screen
+    var response = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="static/main.css">
+        <title>KingdomCtvn | Video Library</title>
+    </head>
+    <body>
+        <h2 class="h2_query">Kingdom<span>Ctvn</span></h2>
+            <div class="col-1" id="coll">
+                <nav>
+                    <h2 class="hide_query">Kingdom<span>Ctvn</span></h2>
+                    <ul id="add" class="topnav">
+                        <li><a href="main.html">Dashboard <i class="fa fa-user-o"></i></a></li>
+                        <li><a href="video-lib.html">Video Library <i class="fa fa-video-camera"></i></a></li>
+                        <li><a href="upload.html">Upload Video <i class="fa fa-cloud-upload"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        <div class="mid">
+           <i class="fa fa-check-circle" aria-hidden="true"></i>
+        <br>
+           <div> 
+           
+              <h3>Video uploaded successfully.</h3>
+           
+           </div>
+                         
+        </div>
+      </body>
+    </html>
+    `
+    ;
+    return response;
+}
+  
+app.post('/video-upload', upload.single('video-file'), async (req, res, next) => {
+  
+        // req.file is the `profile-file` file
+        // req.body will hold the text fields,
+        // if there were any
+        console.log(JSON.stringify(req.file));
+
+        // req.file.path will have path of image
+        // stored in uploads folder
+        var locaFilePath = req.file.path;
+  
+        // Upload the local image to Cloudinary 
+        // and get image url as response
+        var result = await uploadToCloudinary(locaFilePath);
+  
+        // Generate html to display images on web page.
+        var response = buildSuccessMsg([result.url]);
+  
+        return res.send(response);
+    }
+);
+
+
+
+app.listen(port,() => console.log(`Server running on port ${port}!`))

@@ -1,0 +1,212 @@
+Email:log@kingdomctv.mail
+Pass: @divineLog22
+
+
+app.post('/video-upload', upload.single('video-file'), function (req, res, next) {
+  // req.file is the `video-file` file
+  // req.body will hold the text fields, if there were any
+  console.log(JSON.stringify(req.file))
+//   '<a href="main.html">Home</a><br>'
+  var response = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="static/main.css">
+      <title>KingdomCtvn | Video Library</title>
+  </head>
+  <body>
+      <h2 class="h2_query">Kingdom<span>Ctvn</span></h2>
+          <div class="col-1" id="coll">
+              <nav>
+                  <h2 class="hide_query">Kingdom<span>Ctvn</span></h2>
+                  <ul id="add" class="topnav">
+                      <li><a href="main.html">Dashboard <i class="fa fa-user-o"></i></a></li>
+                      <li><a href="video-lib.html">Video Library <i class="fa fa-video-camera"></i></a></li>
+                      <li><a href="upload.html">Upload Video <i class="fa fa-cloud-upload"></i></a></li>
+                  </ul>
+              </nav>
+          </div>
+      <div class="mid">
+         <i class="fa fa-check-circle" aria-hidden="true"></i>
+      <br>
+         <div> 
+         
+            <h3>Video uploaded successfully.</h3>
+         
+         </div>
+                       
+      </div>
+    </body>
+  </html>
+  `
+//   response += "Video uploaded successfully.<br>"
+//   response += `<div><img src="${req.file.path}" /><br></div>`
+  return res.send(response)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+  async function uploadToCloudinary(locaFilePath) {
+  
+    // locaFilePath: path of image which was just
+    // uploaded to "uploads" folder
+  
+    // var mainFolderName = "main";
+    // filePathOnCloudinary: path of video we want
+    // to set when it is uploaded to cloudinary
+    // var filePathOnCloudinary = 
+        // mainFolderName + "/" + locaFilePath;
+  
+    return cloudinary.uploader
+        .upload(locaFilePath)
+        .then((result) => {
+  
+            // Image has been successfully uploaded on
+            // cloudinary So we dont need local image 
+            // file anymore
+            // Remove file from local uploads folder
+            fs.unlinkSync(locaFilePath);
+  
+            return {
+                message: "Success"
+                // url: result.url,
+            };
+        })
+        .catch((error) => {
+  
+            // Remove file from local uploads folder
+            fs.unlinkSync(locaFilePath);
+            return { message: "Fail" };
+        });
+}
+
+
+
+function buildSuccessMsg() {
+  
+    // Building success msg to display on screen
+    var response = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="static/main.css">
+        <title>KingdomCtvn | Video Library</title>
+    </head>
+    <body>
+        <h2 class="h2_query">Kingdom<span>Ctvn</span></h2>
+            <div class="col-1" id="coll">
+                <nav>
+                    <h2 class="hide_query">Kingdom<span>Ctvn</span></h2>
+                    <ul id="add" class="topnav">
+                        <li><a href="main.html">Dashboard <i class="fa fa-user-o"></i></a></li>
+                        <li><a href="video-lib.html">Video Library <i class="fa fa-video-camera"></i></a></li>
+                        <li><a href="upload.html">Upload Video <i class="fa fa-cloud-upload"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        <div class="mid">
+           <i class="fa fa-check-circle" aria-hidden="true"></i>
+        <br>
+           <div> 
+           
+              <h3>Video uploaded successfully.</h3>
+           
+           </div>
+                         
+        </div>
+      </body>
+    </html>
+    `;
+    return response;
+}
+
+
+
+app.post('/video-upload', upload.single('video-file'), async (req, res, next) => {
+  
+        // req.file is the `video-file` file
+        // req.body will hold the text fields, if there were any
+
+        console.log(JSON.stringify(req.file))
+
+        
+        // req.file.path will have path of video
+        // stored in uploads folder
+        var locaFilePath = req.file.path;
+        
+        const result = await cloudinary.uploader.upload(locaFilePath);
+
+        console.log(result);
+        // Upload the local video to Cloudinary 
+        // and get video url as response
+        // var result = await uploadToCloudinary(locaFilePath);
+        // Generate html to display videos on web page.
+        var response = buildSuccessMsg();
+  
+        return res.send(response);
+    }
+);
+
+
+
+  app.post('/video-upload', upload.single('video-file'), async function(req, res) {
+    
+    // req.file is the `video-file` file
+    // req.body will hold the text fields, if there were any
+
+    console.log(JSON.stringify(req.file))
+  //   '<a href="main.html">Home</a><br>'
+    var response = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="static/main.css">
+        <title>KingdomCtvn | Video Library</title>
+    </head>
+    <body>
+        <h2 class="h2_query">Kingdom<span>Ctvn</span></h2>
+            <div class="col-1" id="coll">
+                <nav>
+                    <h2 class="hide_query">Kingdom<span>Ctvn</span></h2>
+                    <ul id="add" class="topnav">
+                        <li><a href="main.html">Dashboard <i class="fa fa-user-o"></i></a></li>
+                        <li><a href="video-lib.html">Video Library <i class="fa fa-video-camera"></i></a></li>
+                        <li><a href="upload.html">Upload Video <i class="fa fa-cloud-upload"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        <div class="mid">
+           <i class="fa fa-check-circle" aria-hidden="true"></i>
+        <br>
+           <div> 
+           
+              <h3>Video uploaded successfully.</h3>
+           
+           </div>
+                         
+        </div>
+      </body>
+    </html>
+    `
+  //   response += "Video uploaded successfully.<br>"
+  //   response += `<div><img src="${req.file.path}" /><br></div>`
+    return res.send(response)
+  })
