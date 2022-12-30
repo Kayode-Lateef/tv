@@ -1,31 +1,19 @@
 require('dotenv').config();
 
 var express = require('express')
-var multer  = require('multer')
+// var multer  = require('multer')
 var port = process.env.PORT || 3000;
-const fs = require("fs");
+// const fs = require("fs");
 const bodyParser = require("body-parser");
-const cloudinary = require('cloudinary').v2;
+// const cloudinary = require('cloudinary').v2;
+
+const multer = require('multer');
+const aws = require('aws-sdk');
+const multerS3 = require('multer-s3');
 
 
-// Creating uploads folder if not already present
-// In "uploads" folder we will temporarily upload
-// image before uploading to cloudinary
-if (!fs.existsSync("./uploads")) {
-    fs.mkdirSync("./uploads");
-}
 var app = express()
 
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './uploads')
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.originalname)
-    }
-})
-
-var upload = multer({ storage: storage })
 
 
 
@@ -43,57 +31,42 @@ app.use(express.static(__dirname + '/public'));
 app.use('/uploads', express.static('uploads'));
 
 
-// Cloudinary configuration
-cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET
-  });
+aws.config.update({
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  region: 'us-west-2',
+  correctClockSkew: true,
+});
 
-//   cloudinary.config({
-//     cloud_name: 'djqjie6ra',
-//     api_key: '693235451313966',
-//     api_secret: 'Prjtsyn-Hfjg_RNM8knTdJp430Q'
-//   });
+const s3 = new aws.S3();
 
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'video/mp4') {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type, only MP4 is allowed!'), false);
+  }
+};
 
-async function uploadToCloudinary(locaFilePath) {
-  
-    // locaFilePath: path of image which was just
-    // uploaded to "uploads" folder
-  
-    var mainFolderName = "main";
-    // filePathOnCloudinary: path of image we want
-    // to set when it is uploaded to cloudinary
-    var filePathOnCloudinary = 
-        mainFolderName + "/" + locaFilePath;
-  
-    return cloudinary.uploader
-        .upload(locaFilePath, { public_id: filePathOnCloudinary })
-        .then((result) => {
-  
-            // Image has been successfully uploaded on
-            // cloudinary So we dont need local image 
-            // file anymore
-            // Remove file from local uploads folder
-            fs.unlinkSync(locaFilePath);
-  
-            return {
-                message: "Success",
-                url: result.url,
-            };
-        })
-        .catch((error) => {
-  
-            // Remove file from local uploads folder
-            fs.unlinkSync(locaFilePath);
-            return { message: "Fail" };
-        });
-}
-  
-function buildSuccessMsg(urlList) {
-  
-    // Building success msg to display on screen
+const upload = multer({
+  fileFilter,
+  storage: multerS3({
+    s3,
+    bucket: 'kaytechbucket',
+    acl: 'public-read',
+    metadata: function (req, file, cb) {
+      cb(null, {fieldName: file.fieldname});
+    },
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString())
+    }
+  })
+});
+
+app.post('/upload', upload.single('video'), (req, res, next) => {
+    const video = req.file;
+    console.log(video);
+
     var response = `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -129,32 +102,12 @@ function buildSuccessMsg(urlList) {
       </body>
     </html>
     `
-    ;
-    return response;
-}
-  
-app.post('/video-upload', upload.single('video-file'), async (req, res, next) => {
-  
-        // req.file is the `profile-file` file
-        // req.body will hold the text fields,
-        // if there were any
-        console.log(JSON.stringify(req.file));
+  //   response += "Video uploaded successfully.<br>"
+  //   response += `<div><img src="${req.file.path}" /><br></div>`
+    return res.send(response)
 
-        // req.file.path will have path of image
-        // stored in uploads folder
-        var locaFilePath = req.file.path;
+    // res.sendStatus(200);
+  });
   
-        // Upload the local image to Cloudinary 
-        // and get image url as response
-        var result = await uploadToCloudinary(locaFilePath);
-  
-        // Generate html to display images on web page.
-        var response = buildSuccessMsg([result.url]);
-  
-        return res.send(response);
-    }
-);
-
-
 
 app.listen(port,() => console.log(`Server running on port ${port}!`))
