@@ -1,8 +1,7 @@
 Email:log@kingdomctv.mail
 Pass: @divineLog22
 
-AccessKEY: AKIAWV2YGISEZ34PK3K4
-SECRET KEY: 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
+
 
 
 app.post('/video-upload', upload.single('video-file'), function (req, res, next) {
